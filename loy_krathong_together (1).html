@@ -1,0 +1,2216 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ลอยกระทงด้วยกันนะ... อาร์ม & การ์ตูน</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Mali & Prompt -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mali:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Firebase Compat SDKs for Reliable Live Sync -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mali: ['Mali', 'cursive'],
+                        prompt: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        night: {
+                            950: '#070B19',
+                            900: '#0B1026',
+                            800: '#141C3A',
+                            700: '#1B2447',
+                        },
+                        amberGlow: '#FFD166',
+                        warmGold: '#F4A261',
+                        peachRose: '#FF8FA3',
+                    },
+                    animation: {
+                        'float-slow': 'floatSlow 5s ease-in-out infinite',
+                        'float-delayed': 'floatSlow 5.5s ease-in-out 1.5s infinite',
+                        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+                        'candle-flicker': 'flicker 1.6s ease-in-out infinite alternate',
+                        'pray-aura': 'prayAura 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        floatSlow: {
+                            '0%, 100%': { transform: 'translateY(0px) rotate(-1.5deg)' },
+                            '50%': { transform: 'translateY(-10px) rotate(1.5deg)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.88', transform: 'scale(1)' },
+                            '50%': { opacity: '1', transform: 'scale(1.04)' },
+                        },
+                        flicker: {
+                            '0%': { transform: 'scale(0.94) skewX(-2deg)', opacity: '0.9' },
+                            '50%': { transform: 'scale(1.06) skewX(2deg)', opacity: '1' },
+                            '100%': { transform: 'scale(0.98) skewX(-1deg)', opacity: '0.92' },
+                        },
+                        prayAura: {
+                            '0%': { boxShadow: '0 0 28px rgba(255, 209, 102, 0.45), 0 0 60px rgba(255, 143, 163, 0.25)', transform: 'scale(0.98)' },
+                            '100%': { boxShadow: '0 0 48px rgba(255, 209, 102, 0.85), 0 0 90px rgba(255, 143, 163, 0.45)', transform: 'scale(1.03)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        input, textarea {
+            user-select: text;
+        }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background: linear-gradient(180deg, #070B19 0%, #0B1026 35%, #1B2447 68%, #0E1733 100%);
+            color: #F8FAFC;
+            overflow-x: hidden;
+            min-height: 100dvh;
+        }
+        .font-hand {
+            font-family: 'Mali', cursive;
+        }
+        .glass-panel {
+            background: rgba(20, 28, 58, 0.65);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 209, 102, 0.2);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.48);
+        }
+        .glass-pill {
+            background: rgba(11, 16, 38, 0.76);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+        .full-moon {
+            background: radial-gradient(circle at 35% 35%, #FFFBEB 0%, #FDE68A 45%, #F59E0B 95%);
+            box-shadow: 
+                0 0 40px rgba(253, 230, 138, 0.55),
+                0 0 90px rgba(245, 158, 11, 0.3),
+                0 0 140px rgba(255, 209, 102, 0.15);
+        }
+        .water-surface {
+            background: linear-gradient(180deg, rgba(16, 25, 56, 0.85) 0%, rgba(9, 14, 34, 0.98) 100%);
+            border-top: 1px solid rgba(255, 209, 102, 0.22);
+        }
+        .moon-reflection {
+            background: repeating-linear-gradient(
+                180deg,
+                rgba(255, 209, 102, 0.22) 0px,
+                rgba(255, 209, 102, 0.04) 6px,
+                transparent 12px,
+                rgba(255, 209, 102, 0.16) 18px
+            );
+            filter: blur(3px);
+            animation: waterShimmer 4s ease-in-out infinite alternate;
+        }
+        @keyframes waterShimmer {
+            0% { transform: scaleX(0.92) translateY(0); opacity: 0.65; }
+            100% { transform: scaleX(1.08) translateY(4px); opacity: 0.9; }
+        }
+        @keyframes prayPulse {
+            0%, 100% { transform: scale(1); text-shadow: 0 0 20px rgba(255, 209, 102, 0.85), 0 0 40px rgba(255, 143, 163, 0.6); }
+            50% { transform: scale(1.06); text-shadow: 0 0 32px rgba(255, 209, 102, 1), 0 0 65px rgba(255, 143, 163, 0.9); }
+        }
+        .pray-banner-glow {
+            animation: prayPulse 1.8s ease-in-out infinite;
+        }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(11, 16, 38, 0.4); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 209, 102, 0.35); border-radius: 9999px; }
+    </style>
+</head>
+<body class="relative flex flex-col justify-between selection:bg-peachRose/30 selection:text-amberGlow">
+
+    <!-- Ambient Sky & River Canvas -->
+    <canvas id="ambientCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+    <!-- Sky Click Layer in Stage 4 -->
+    <div id="skyInteractiveLayer" class="fixed inset-0 z-10 hidden cursor-pointer" title="แตะท้องฟ้าเพื่อจุดพลุหัวใจหรือปล่อยโคมลอย"></div>
+
+    <!-- Full Moon -->
+    <div class="fixed inset-x-0 top-0 h-[65vh] pointer-events-none z-0 overflow-hidden">
+        <div class="full-moon w-24 h-24 sm:w-32 sm:h-32 rounded-full absolute top-14 right-8 sm:right-20 animate-pulse-glow opacity-95">
+            <div class="w-4 h-4 rounded-full bg-amber-500/15 absolute top-5 left-6"></div>
+            <div class="w-6 h-6 rounded-full bg-amber-500/10 absolute bottom-6 right-6"></div>
+            <div class="w-3 h-3 rounded-full bg-amber-500/15 absolute top-12 right-8"></div>
+        </div>
+    </div>
+
+    <!-- River Horizon & Water Surface -->
+    <div class="fixed inset-x-0 bottom-0 h-[36vh] water-surface pointer-events-none z-0">
+        <div class="moon-reflection w-28 sm:w-36 h-full mx-auto mr-6 sm:mr-18 opacity-75"></div>
+    </div>
+
+    <!-- TOP BAR -->
+    <header class="relative z-30 w-full max-w-lg mx-auto px-4 pt-3 pb-2 flex items-center justify-between gap-2">
+        <!-- Couple Sync Status Pill -->
+        <div class="glass-pill px-3 py-1.5 rounded-full flex items-center gap-2 text-xs">
+            <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span id="syncModeText" class="text-slate-200 font-medium truncate max-w-[175px] sm:max-w-[225px]">เชื่อมต่อออนไลน์แล้ว (Arm & Katoon)</span>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center gap-1.5">
+            <button id="btnToggleDemoBot" onclick="togglePartnerBot()" title="จำลองอีกฝ่ายออนไลน์ (ทดสอบลอยคู่คนเดียวได้ทันที)" class="glass-pill px-2.5 py-1.5 rounded-full text-xs text-peachRose hover:bg-peachRose/20 transition flex items-center gap-1.5 border border-peachRose/30">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <span id="botBtnLabel">จำลองอีกฝ่าย</span>
+            </button>
+
+            <button id="btnAudio" onclick="toggleAudio()" title="เปิด/ปิดเสียงขิมและสายน้ำ" class="glass-pill w-8 h-8 rounded-full flex items-center justify-center text-amberGlow hover:bg-white/10 transition">
+                <i id="audioIcon" class="fa-solid fa-volume-xmark text-xs"></i>
+            </button>
+
+            <button onclick="openConfigModal()" title="ตรวจสอบการเชื่อมต่อ / รีเซ็ตห้องพิธี" class="glass-pill w-8 h-8 rounded-full flex items-center justify-center text-slate-300 hover:text-amberGlow hover:bg-white/10 transition">
+                <i class="fa-solid fa-gear text-xs"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="relative z-20 flex-1 w-full max-w-lg mx-auto px-4 py-2 flex flex-col justify-center">
+
+        <!-- =========================================================
+             STAGE 1: ENTRANCE — อาร์ม & การ์ตูน (Arm & Katoon)
+             ========================================================= -->
+        <section id="stage1" class="space-y-5 my-auto transition-all duration-500">
+            <div class="text-center space-y-2 pt-2">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amberGlow/15 border border-amberGlow/30 text-amberGlow text-xs font-medium">
+                    <i class="fa-solid fa-moon"></i>
+                    <span>วันขึ้น ๑๕ ค่ำ เดือน ๑๒ • ๒๔ พฤศจิกายน ๒๕๖๙</span>
+                </div>
+                <h1 class="font-hand text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amberGlow to-peachRose drop-shadow-sm pt-1">
+                    ลอยกระทงด้วยกันนะ... อาร์ม & การ์ตูน
+                </h1>
+                <p class="font-hand text-base text-peachRose/90 font-semibold tracking-wide">
+                    ARM ❤️ KATOON
+                </p>
+                <p class="text-slate-300 text-xs sm:text-sm max-w-xs mx-auto leading-relaxed">
+                    ค่ำคืนวันเพ็ญที่มีแค่เราสองคน เลือกฝั่งของคุณแล้วส่งลิงก์ให้อีกฝ่ายเข้ามาลอยกระทงพร้อมกัน
+                </p>
+            </div>
+
+            <!-- Role Selection & Share Card -->
+            <div class="glass-panel rounded-3xl p-5 space-y-4">
+                <div class="space-y-2">
+                    <label class="block text-xs text-slate-300 font-medium text-center">คุณคือใครในคืนนี้?</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" id="roleArmBtn" onclick="selectRole('arm')"
+                            class="p-3.5 rounded-2xl border-2 border-amberGlow bg-amberGlow/15 text-center transition flex flex-col items-center gap-1">
+                            <span class="text-2xl">🌙</span>
+                            <span class="font-hand font-bold text-base text-white">ฉันคือ อาร์ม</span>
+                            <span class="text-[11px] text-amberGlow">ลอยฝั่งซ้ายของสายน้ำ</span>
+                        </button>
+
+                        <button type="button" id="roleKatoonBtn" onclick="selectRole('katoon')"
+                            class="p-3.5 rounded-2xl border border-white/15 bg-night-900/55 text-center hover:border-peachRose/50 transition flex flex-col items-center gap-1">
+                            <span class="text-2xl">🌸</span>
+                            <span class="font-hand font-bold text-base text-white">ฉันคือ การ์ตูน</span>
+                            <span class="text-[11px] text-peachRose">ลอยฝั่งขวาเคียงคู่กัน</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Share Link for Partner -->
+                <div class="bg-night-950/70 rounded-2xl p-3.5 border border-white/10 space-y-2">
+                    <button onclick="copyInviteLink()" class="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-amberGlow/20 border border-amberGlow/30 text-amberGlow font-semibold text-xs transition flex items-center justify-center gap-2 active:scale-98">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span id="copyLinkBtnLabel">คัดลอกลิงก์ส่งให้การ์ตูน</span>
+                    </button>
+                    <p class="text-[11px] text-slate-400 text-center">
+                        เชื่อมต่อฐานข้อมูลออนไลน์พร้อมใช้งานแล้ว ส่งลิงก์ให้แฟนเปิดพร้อมกันได้เลย
+                    </p>
+                </div>
+
+                <!-- Live Partner Presence -->
+                <div class="flex items-center gap-3 bg-white/5 rounded-2xl px-3.5 py-2.5 border border-white/10">
+                    <div id="partnerAvatarIcon" class="w-9 h-9 rounded-full bg-slate-700/80 flex items-center justify-center text-base shrink-0">
+                        ⏳
+                    </div>
+                    <div class="min-w-0">
+                        <p id="partnerStatusTitle" class="text-xs font-medium text-slate-200 truncate">กำลังรอ การ์ตูน เข้ามา...</p>
+                        <p id="partnerStatusSub" class="text-[11px] text-slate-400 truncate">หรือกด "จำลองอีกฝ่าย" มุมขวาบนเพื่อทดสอบได้เลย</p>
+                    </div>
+                </div>
+
+                <!-- Enter Customization -->
+                <button onclick="goToStage(2)" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-peachRose via-rose-400 to-warmGold text-night-950 font-bold text-base shadow-xl shadow-peachRose/25 hover:brightness-105 active:scale-[0.98] transition flex items-center justify-center gap-2">
+                    <span id="startStage2Label">เริ่มทำกระทงของ อาร์ม</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             STAGE 2: CUSTOMIZE KRATHONG & WISH
+             ========================================================= -->
+        <section id="stage2" class="hidden space-y-3 my-auto transition-all duration-500">
+            <div class="flex items-center justify-between">
+                <button onclick="goToStage(1)" class="glass-pill px-3 py-1.5 rounded-full text-xs text-slate-300 hover:text-white flex items-center gap-1">
+                    <i class="fa-solid fa-chevron-left"></i> เปลี่ยนฝั่ง
+                </button>
+                <div class="glass-pill px-3 py-1 rounded-full text-xs text-amberGlow flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-peachRose animate-ping"></span>
+                    <span id="stage2PartnerHint">รอการ์ตูนเข้ามาแต่งกระทง...</span>
+                </div>
+            </div>
+
+            <!-- Live SVG Krathong Preview -->
+            <div class="relative flex flex-col items-center justify-center py-1">
+                <div class="absolute w-44 h-44 rounded-full bg-amberGlow/15 blur-2xl pointer-events-none"></div>
+                <div id="previewKrathongContainer" class="w-40 h-36 sm:w-44 sm:h-40 animate-float-slow flex items-center justify-center drop-shadow-[0_12px_20px_rgba(0,0,0,0.6)]"></div>
+                <span id="previewOwnerTag" class="text-xs text-amberGlow font-hand mt-1">✨ กระทงของ อาร์ม ✨</span>
+            </div>
+
+            <!-- Customization Form -->
+            <div class="glass-panel rounded-3xl p-4 space-y-3">
+                <!-- Base -->
+                <div>
+                    <label class="text-xs text-slate-300 font-medium mb-1.5 block">1. เลือกฐานกระทง</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button type="button" onclick="setKrathongOption('base', 'banana')" data-val="banana" class="opt-base p-2 rounded-xl border border-amberGlow bg-amberGlow/20 flex flex-col items-center gap-1 transition">
+                            <span class="text-lg">🌿</span>
+                            <span class="text-[11px] font-medium">ใบตองคลาสสิก</span>
+                        </button>
+                        <button type="button" onclick="setKrathongOption('base', 'lotus')" data-val="lotus" class="opt-base p-2 rounded-xl border border-white/10 bg-night-900/60 flex flex-col items-center gap-1 transition">
+                            <span class="text-lg">🪷</span>
+                            <span class="text-[11px] font-medium">ดอกบัวสีชมพู</span>
+                        </button>
+                        <button type="button" onclick="setKrathongOption('base', 'bread')" data-val="bread" class="opt-base p-2 rounded-xl border border-white/10 bg-night-900/60 flex flex-col items-center gap-1 transition">
+                            <span class="text-lg">🍞</span>
+                            <span class="text-[11px] font-medium">ขนมปังรูปหัวใจ</span>
+                        </button>
+                        <button type="button" onclick="setKrathongOption('base', 'coconut')" data-val="coconut" class="opt-base p-2 rounded-xl border border-white/10 bg-night-900/60 flex flex-col items-center gap-1 transition">
+                            <span class="text-lg">🥥</span>
+                            <span class="text-[11px] font-medium">กะลามะพร้าว</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Decor -->
+                <div>
+                    <label class="text-xs text-slate-300 font-medium mb-1.5 block">2. ของตกแต่งสื่อรัก</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button type="button" onclick="setKrathongOption('decor', 'classic')" data-val="classic" class="opt-decor p-2 rounded-xl border border-amberGlow bg-amberGlow/20 flex flex-col items-center gap-1 transition">
+                            <span class="text-lg">🕯️</span>
+                            <span class="text-[11px] font-medium">ดอกไม้ธูปเทียน</span>
+                        </button>
+                        <button type="button" onclick="setKrathongOption('decor', 'hearts')" data-val="hearts" class="opt-decor p-2 rounded-xl border border-white/10 bg-night-900/60 flex flex-col items-center gap-1 transition">
+                            <span class="text-lg">💖</span>
+                            <span class="text-[11px] font-medium">หัวใจคู่</span>
+                        </button>
+                        <button type="button" onclick="setKrathongOption('decor', 'ring')" data-val="ring" class="opt-decor p-2 rounded-xl border border-white/10 bg-night-900/60 flex flex-col items-center gap-1 transition">
+                            <span class="text-lg">💍</span>
+                            <span class="text-[11px] font-medium">แหวนแทนใจ</span>
+                        </button>
+                        <button type="button" onclick="setKrathongOption('decor', 'stars')" data-val="stars" class="opt-decor p-2 rounded-xl border border-white/10 bg-night-900/60 flex flex-col items-center gap-1 transition">
+                            <span class="text-lg">✨</span>
+                            <span class="text-[11px] font-medium">ดาวนำโชค</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Wish -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label id="wishInputLabel" class="text-xs text-slate-300 font-medium">3. คำอธิษฐานของ อาร์ม</label>
+                        <button type="button" onclick="randomRomanticWish()" class="text-[11px] text-peachRose hover:underline flex items-center gap-1">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> สุ่มคำอธิษฐานหวานๆ
+                        </button>
+                    </div>
+                    <textarea id="inputWish" rows="3" maxlength="250" placeholder="เขียนคำอธิษฐานถึงกันในคืนวันเพ็ญ..."
+                        oninput="syncMyDraft()"
+                        class="w-full bg-night-950/75 border border-white/15 rounded-xl px-3.5 py-2.5 text-sm font-hand text-amber-100 placeholder-slate-500 focus:outline-none focus:border-amberGlow resize-none"></textarea>
+                    <div class="text-right text-[10px] text-slate-400 mt-0.5">
+                        <span id="wishCharCount">0</span>/250 ตัวอักษร (แสดงครบทั้งหมดในการ์ดความทรงจำ)
+                    </div>
+                </div>
+
+                <!-- Ready Button -->
+                <button onclick="confirmReadyToFloat()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amberGlow to-warmGold text-night-950 font-bold text-sm shadow-lg shadow-amberGlow/20 hover:brightness-105 active:scale-[0.98] transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <span>พร้อมลอยกระทง</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             STAGE 3: SYNCHRONIZED PRAY & RELEASE RITUAL
+             (Hold together to see "อธิษฐาน", release together to float!)
+             ========================================================= -->
+        <section id="stage3" class="hidden space-y-4 my-auto text-center transition-all duration-500 relative">
+            <div class="flex justify-start">
+                <button onclick="backToEdit()" class="glass-pill px-3 py-1.5 rounded-full text-xs text-slate-300 hover:text-white flex items-center gap-1">
+                    <i class="fa-solid fa-pen"></i> แก้ไขกระทง
+                </button>
+            </div>
+
+            <div class="space-y-1">
+                <h2 class="font-hand text-2xl sm:text-3xl font-bold text-amberGlow">เตรียมปล่อยกระทงคู่กัน</h2>
+                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                    กดปุ่มค้างไว้พร้อมกันเพื่อ <span class="text-amberGlow font-semibold">"อธิษฐาน"</span><br>
+                    และ <span class="text-peachRose font-semibold">ปล่อยนิ้วพร้อมกัน</span> เพื่อปล่อยกระทงลงสู่สายน้ำ
+                </p>
+            </div>
+
+            <!-- Prominent Center Overlay Banner when BOTH are holding simultaneously -->
+            <div id="prayingOverlayBanner" class="hidden z-30 py-3 px-6 rounded-3xl bg-gradient-to-r from-amberGlow/25 via-peachRose/25 to-amberGlow/25 border-2 border-amberGlow backdrop-blur-md animate-pray-aura mx-auto max-w-xs">
+                <div class="text-xs text-amber-200 tracking-wider mb-0.5">✨ อาร์ม ❤️ การ์ตูน ✨</div>
+                <div class="font-hand text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white via-amber-200 to-amberGlow drop-shadow-[0_4px_16px_rgba(255,209,102,0.85)] py-1">
+                    อธิษฐาน
+                </div>
+                <div class="text-[11px] text-peachRose font-medium mt-0.5">
+                    ตั้งจิตอธิษฐานด้วยกัน... แล้วปล่อยนิ้วพร้อมกันนะ
+                </div>
+            </div>
+
+            <!-- Two Krathongs Side-by-Side at Pier -->
+            <div class="relative py-3 px-2">
+                <!-- Golden Thread Connecting Both Krathongs -->
+                <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 360 180">
+                    <path id="pierGoldenThread" d="M 105 105 Q 180 135 255 105" fill="none" stroke="url(#goldLink)" stroke-width="2" stroke-dasharray="4 4">
+                        <animate attributeName="stroke-dashoffset" from="16" to="0" dur="1.5s" repeatCount="indefinite" />
+                    </path>
+                    <defs>
+                        <linearGradient id="goldLink" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#FFD166" stop-opacity="0.3"/>
+                            <stop offset="50%" stop-color="#FF8FA3" stop-opacity="1"/>
+                            <stop offset="100%" stop-color="#FFD166" stop-opacity="0.3"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+
+                <div class="grid grid-cols-2 gap-3 items-end relative z-10">
+                    <!-- Left: Arm -->
+                    <div class="flex flex-col items-center">
+                        <div id="pierKrathongArm" class="w-32 h-32 sm:w-36 sm:h-36 animate-float-slow flex items-center justify-center transition-transform duration-300"></div>
+                        <div class="glass-pill px-3 py-1 rounded-full mt-1 flex items-center gap-1.5">
+                            <span id="pierDotArm" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <span class="text-xs font-hand font-bold text-amberGlow">อาร์ม</span>
+                        </div>
+                        <span id="pierStateArm" class="text-[11px] text-slate-300 mt-1">พร้อมลอยแล้ว</span>
+                    </div>
+
+                    <!-- Right: Katoon -->
+                    <div class="flex flex-col items-center">
+                        <div id="pierKrathongKatoon" class="w-32 h-32 sm:w-36 sm:h-36 animate-float-delayed flex items-center justify-center"></div>
+                        <div class="glass-pill px-3 py-1 rounded-full mt-1 flex items-center gap-1.5">
+                            <span id="pierDotKatoon" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                            <span class="text-xs font-hand font-bold text-peachRose">การ์ตูน</span>
+                        </div>
+                        <span id="pierStateKatoon" class="text-[11px] text-slate-400 mt-1">กำลังเตรียมตัว...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Synchronized Pray & Release Hold Ritual (No 5s Countdown!) -->
+            <div class="flex flex-col items-center justify-center space-y-3 pt-1">
+                <!-- Prominent Golden "อธิษฐาน" Banner when BOTH hold simultaneously -->
+                <div id="prayTogetherBanner" class="hidden px-7 py-2.5 rounded-full bg-gradient-to-r from-amberGlow/25 via-peachRose/30 to-amberGlow/25 border-2 border-amberGlow shadow-[0_0_35px_rgba(255,209,102,0.55)]">
+                    <span class="font-hand text-3xl sm:text-4xl font-bold text-amber-100 pray-banner-glow tracking-wider">
+                        ✨ อธิษฐาน ✨
+                    </span>
+                </div>
+
+                <div class="relative w-28 h-28 flex items-center justify-center">
+                    <!-- Outer Aura Ring -->
+                    <div id="holdAuraRing" class="absolute inset-0 rounded-full border-4 border-white/15 transition-all duration-300"></div>
+
+                    <button id="holdFloatBtn"
+                        onmousedown="startHolding()" onmouseup="stopHolding()" onmouseleave="stopHolding()"
+                        ontouchstart="startHolding(event)" ontouchend="stopHolding()" ontouchcancel="stopHolding()"
+                        class="relative w-[88px] h-[88px] rounded-full bg-gradient-to-br from-peachRose to-amberGlow text-night-950 font-bold shadow-[0_0_25px_rgba(255,143,163,0.5)] active:scale-95 transition-transform flex flex-col items-center justify-center cursor-pointer">
+                        <i class="fa-solid fa-hands-praying text-xl mb-0.5"></i>
+                        <span id="holdBtnMainText" class="text-[11px] leading-tight font-bold">กดค้างไว้<br>พร้อมกัน</span>
+                    </button>
+                </div>
+
+                <div id="holdFeedbackText" class="text-xs font-medium text-amberGlow min-h-[20px] px-3">
+                    แตะค้างที่ปุ่มพร้อมกันเพื่อตั้งจิต "อธิษฐาน" แล้วปล่อยนิ้วพร้อมกัน
+                </div>
+
+                <button id="btnSoloOverride" onclick="triggerLaunchTogether()" class="hidden text-[11px] text-slate-400 underline hover:text-amberGlow">
+                    หรือกดลอยนำร่องไปก่อน (หากอีกฝ่ายยังไม่สะดวกกดพร้อมกัน)
+                </button>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             STAGE 4: TOGETHER ON THE RIVER
+             ========================================================= -->
+        <section id="stage4" class="hidden flex-1 flex flex-col justify-between py-2 transition-all duration-700">
+            <div class="text-center space-y-1 pointer-events-none mt-1">
+                <span class="inline-block px-3 py-0.5 rounded-full bg-peachRose/20 border border-peachRose/40 text-peachRose text-[11px] font-medium">
+                    ✨ ลอยเคียงคู่กันบนสายน้ำ ✨
+                </span>
+                <h2 class="font-hand text-2xl sm:text-3xl font-bold text-amber-100 drop-shadow leading-snug">
+                    สุขสันต์วันลอยกระทง<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-amberGlow to-peachRose">อาร์ม & การ์ตูน</span>
+                </h2>
+                <p class="text-[11px] text-slate-300">
+                    แตะที่ <span class="text-amberGlow">กระทง</span> เพื่ออ่านคำอธิษฐาน • แตะที่ <span class="text-peachRose">ท้องฟ้า</span> เพื่อปล่อยโคมหรือจุดพลุ
+                </p>
+            </div>
+
+            <!-- Floating Couple Krathongs -->
+            <div class="relative h-56 sm:h-64 w-full flex items-center justify-center my-auto z-20">
+                <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 220">
+                    <path d="M 125 130 Q 200 165 275 130" fill="none" stroke="url(#riverGoldLink)" stroke-width="2.5" stroke-dasharray="5 5">
+                        <animate attributeName="stroke-dashoffset" from="20" to="0" dur="2s" repeatCount="indefinite" />
+                    </path>
+                    <circle cx="200" cy="147" r="4" fill="#FF8FA3">
+                        <animate attributeName="r" values="3;5.5;3" dur="2s" repeatCount="indefinite" />
+                    </circle>
+                    <defs>
+                        <linearGradient id="riverGoldLink" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#FFD166" stop-opacity="0.3"/>
+                            <stop offset="50%" stop-color="#FF8FA3" stop-opacity="1"/>
+                            <stop offset="100%" stop-color="#FFD166" stop-opacity="0.3"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+
+                <!-- Arm's Krathong -->
+                <div onclick="openWishCard('arm')" class="cursor-pointer group flex flex-col items-center mr-3 sm:mr-6 animate-float-slow transition-transform hover:scale-105">
+                    <div class="glass-pill px-3 py-0.5 rounded-full text-xs font-hand font-bold text-amberGlow mb-1 flex items-center gap-1">
+                        <i class="fa-solid fa-envelope-open-text text-[10px]"></i>
+                        <span>อาร์ม</span>
+                    </div>
+                    <div id="riverKrathongArm" class="w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center drop-shadow-[0_15px_25px_rgba(255,209,102,0.25)]"></div>
+                    <div class="w-28 h-4 rounded-[100%] border border-amberGlow/30 -mt-3 animate-ping opacity-40"></div>
+                </div>
+
+                <!-- Katoon's Krathong -->
+                <div onclick="openWishCard('katoon')" class="cursor-pointer group flex flex-col items-center ml-3 sm:ml-6 animate-float-delayed transition-transform hover:scale-105">
+                    <div class="glass-pill px-3 py-0.5 rounded-full text-xs font-hand font-bold text-peachRose mb-1 flex items-center gap-1">
+                        <i class="fa-solid fa-envelope-open-text text-[10px]"></i>
+                        <span>การ์ตูน</span>
+                    </div>
+                    <div id="riverKrathongKatoon" class="w-36 h-36 sm:w-40 sm:h-40 flex items-center justify-center drop-shadow-[0_15px_25px_rgba(255,143,163,0.25)]"></div>
+                    <div class="w-28 h-4 rounded-[100%] border border-peachRose/30 -mt-3 animate-ping opacity-40"></div>
+                </div>
+            </div>
+
+            <!-- Bottom Action Bar -->
+            <div class="relative z-30 glass-panel rounded-3xl p-3.5">
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="spawnSkyLantern()" class="py-2.5 px-2 rounded-2xl bg-white/5 hover:bg-amberGlow/15 border border-white/10 text-xs font-medium text-amberGlow flex flex-col items-center gap-1 active:scale-95 transition">
+                        <i class="fa-solid fa-fire-flame-curved text-sm"></i>
+                        <span>ปล่อยโคมลอย</span>
+                    </button>
+                    <button onclick="spawnHeartFirework()" class="py-2.5 px-2 rounded-2xl bg-white/5 hover:bg-peachRose/15 border border-white/10 text-xs font-medium text-peachRose flex flex-col items-center gap-1 active:scale-95 transition">
+                        <i class="fa-solid fa-heart text-sm"></i>
+                        <span>จุดพลุหัวใจ</span>
+                    </button>
+                    <button onclick="openPolaroidModal()" class="py-2.5 px-2 rounded-2xl bg-gradient-to-r from-amberGlow to-warmGold text-night-950 font-bold text-xs shadow-lg shadow-amberGlow/20 flex flex-col items-center gap-1 active:scale-95 transition">
+                        <i class="fa-solid fa-camera-retro text-sm"></i>
+                        <span>การ์ดความทรงจำ</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- =========================================================
+         MODAL 1: INDIVIDUAL WISH POPUP
+         ========================================================= -->
+    <div id="wishModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4" onclick="closeModal('wishModal')">
+        <div class="glass-panel rounded-3xl max-w-sm w-full p-6 text-center space-y-4 border border-amberGlow/40" onclick="event.stopPropagation()">
+            <div class="w-12 h-12 rounded-full bg-amberGlow/20 text-amberGlow mx-auto flex items-center justify-center text-xl">
+                🏮
+            </div>
+            <div>
+                <span class="text-xs text-slate-400">คำอธิษฐานของ</span>
+                <h3 id="wishModalName" class="font-hand text-2xl font-bold text-amberGlow mt-0.5">อาร์ม</h3>
+            </div>
+            <div class="bg-night-950/75 rounded-2xl p-4 border border-white/10 max-h-60 overflow-y-auto">
+                <p id="wishModalText" class="font-hand text-base text-amber-100 leading-relaxed whitespace-pre-wrap">
+                    "คำอธิษฐาน..."
+                </p>
+            </div>
+            <button onclick="closeModal('wishModal')" class="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-sm font-medium text-white transition">
+                ปิดหน้าต่าง
+            </button>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         MODAL 2: HIGH-RES POLAROID MEMORY CARD
+         ========================================================= -->
+    <div id="polaroidModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto" onclick="closeModal('polaroidModal')">
+        <div class="max-w-sm w-full my-auto space-y-3" onclick="event.stopPropagation()">
+            <div class="rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 bg-[#FDFBF7]">
+                <img id="polaroidPreviewImg" alt="การ์ดความทรงจำ อาร์ม & การ์ตูน" class="w-full h-auto block">
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-2 gap-2.5">
+                <button onclick="closeModal('polaroidModal')" class="py-3 rounded-2xl glass-pill text-sm font-medium text-slate-200 hover:bg-white/10 transition">
+                    กลับไปที่แม่น้ำ
+                </button>
+                <button onclick="downloadPolaroidPNG()" class="py-3 rounded-2xl bg-gradient-to-r from-peachRose to-amberGlow text-night-950 font-bold text-sm shadow-lg flex items-center justify-center gap-2 hover:brightness-105 active:scale-95 transition">
+                    <i class="fa-solid fa-download"></i>
+                    <span>บันทึกรูปภาพ (PNG)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         MODAL 3: CONNECTION STATUS & ROOM RESET
+         ========================================================= -->
+    <div id="configModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4" onclick="closeModal('configModal')">
+        <div class="glass-panel rounded-3xl max-w-md w-full p-5 space-y-4 border border-amberGlow/30" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-base text-amberGlow flex items-center gap-2">
+                    <i class="fa-solid fa-cloud"></i> สถานะการเชื่อมต่อ & เริ่มพิธีใหม่
+                </h3>
+                <button onclick="closeModal('configModal')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="bg-night-950/80 rounded-2xl p-3 border border-emerald-500/30 text-xs space-y-1">
+                <p class="text-emerald-300 font-semibold flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check"></i> เชื่อมต่อ Firebase (loykrathongwthkatoon) อัตโนมัติแล้ว
+                </p>
+                <p id="activeBackendLabel" class="text-slate-400 text-[11px]">กำลังซิงก์ข้อมูลระหว่าง อาร์ม & การ์ตูน แบบเรียลไทม์</p>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-[11px] text-slate-300 block">ระบุ Database URL เพิ่มเติม (ไม่จำเป็นต้องกรอก ระบบตรวจจับให้อัตโนมัติ):</label>
+                <input id="customDbUrlInput" type="text" placeholder="https://loykrathongwthkatoon-default-rtdb.asia-southeast1.firebasedatabase.app"
+                    class="w-full bg-night-950/90 border border-white/15 rounded-xl px-3 py-2 font-mono text-xs text-amber-100 placeholder-slate-600 focus:outline-none focus:border-amberGlow">
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-1">
+                <button onclick="resetCoupleRoom()" class="px-3.5 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-400/30 text-xs font-medium text-rose-200 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i> เริ่มพิธีใหม่ทั้งหมด
+                </button>
+                <button onclick="applyCustomDbUrl()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amberGlow to-warmGold text-night-950 font-bold text-xs shadow-lg hover:brightness-105 transition">
+                    อัปเดตการเชื่อมต่อ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Toast Notification -->
+    <div id="toastBanner" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2">
+        <div class="glass-pill px-4 py-2 rounded-full border border-amberGlow/40 shadow-xl flex items-center gap-2 text-xs font-medium text-amber-100">
+            <i id="toastIcon" class="fa-solid fa-circle-check text-amberGlow"></i>
+            <span id="toastText">แจ้งเตือน</span>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Realtime Database + Firestore Dual-Engine Auto-Connect) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, update, set, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        window.FirebaseSDK = {
+            initializeApp,
+            getDatabase, ref, update, set, onValue,
+            getFirestore, doc, setDoc, onSnapshot
+        };
+
+        if (window.bootFirebaseAutoConnect) {
+            window.bootFirebaseAutoConnect();
+        }
+    </script>
+
+    <script>
+        /* =============================================================
+           1. HARDCODED FIREBASE CONFIG & COUPLE PRESETS (ARM & KATOON)
+           ============================================================= */
+        const DEFAULT_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyCi3KQKdkSRKsEutGmnWT72Uuy7R8gcOCs",
+            authDomain: "loykrathongwthkatoon.firebaseapp.com",
+            projectId: "loykrathongwthkatoon",
+            storageBucket: "loykrathongwthkatoon.firebasestorage.app",
+            messagingSenderId: "774081714152",
+            appId: "1:774081714152:web:dafb95ef9b0c93e6fab65d",
+            measurementId: "G-HHHLW47H6C"
+        };
+
+        const RTDB_CANDIDATE_URLS = [
+            "https://loykrathongwthkatoon-default-rtdb.asia-southeast1.firebasedatabase.app",
+            "https://loykrathongwthkatoon-default-rtdb.firebaseio.com"
+        ];
+
+        const PRIVATE_ROOM_ID = 'arm-and-katoon-2569';
+
+        const WISHES_FOR_ARM = [
+            "ขอให้ความรักของอาร์มกับการ์ตูนสว่างไสวและอบอุ่นเหมือนแสงจันทร์ในคืนวันเพ็ญตลอดไปนะ",
+            "ไม่ว่าจะปีนี้หรือปีไหนๆ อาร์มก็อยากจับมือการ์ตูนเดินไปลอยกระทงด้วยกันแบบนี้ทุกปีเลย",
+            "ขอบคุณการ์ตูนที่เข้ามาเป็นความสุขในทุกๆ วันของอาร์ม ขอให้เราเข้าใจกันและรักกันมากขึ้นทุกวันนะ",
+            "ลอยความเหนื่อยล้าไปกับสายน้ำ แล้วขอให้เหลือแต่รอยยิ้มและความสุขของเราสองคนนะการ์ตูน"
+        ];
+
+        const WISHES_FOR_KATOON = [
+            "ขอให้สายน้ำพัดพาสิ่งดีๆ มาให้อาร์มกับเค้า และขอให้เราได้อยู่เคียงข้างกันแบบนี้ไปนานๆ นะ",
+            "สุขสันต์วันลอยกระทงนะพี่อาร์ม ขอบคุณที่คอยดูแลและน่ารักกับการ์ตูนเสมอมา รักอาร์มที่สุดเลย",
+            "อธิษฐานให้ทุกความฝันของอาร์มเป็นจริง และมีการ์ตูนคอยเป็นกำลังใจอยู่ข้างๆ ตลอดไปนะ",
+            "ไม่ว่าจะผ่านไปกี่ฤดูกาล ก็ขอให้กระทงของเราสองคนลอยเคียงคู่กันไปแบบนี้ทุกปีเลยนะอาร์ม"
+        ];
+
+        const appState = {
+            stage: 1,
+            myRole: 'arm', // 'arm' (left) or 'katoon' (right)
+            syncBackend: 'connecting', // 'rtdb' | 'firestore' | 'local'
+            botActive: false,
+            launched: false,
+            bothPrayedTogether: false,
+            lastDualHoldTimestamp: 0,
+            players: {
+                arm: {
+                    online: true,
+                    name: 'อาร์ม',
+                    base: 'banana',
+                    decor: 'classic',
+                    wish: WISHES_FOR_ARM[0],
+                    ready: false,
+                    holding: false,
+                    lastReleasedAt: 0
+                },
+                katoon: {
+                    online: false,
+                    name: 'การ์ตูน',
+                    base: 'lotus',
+                    decor: 'hearts',
+                    wish: WISHES_FOR_KATOON[0],
+                    ready: false,
+                    holding: false,
+                    lastReleasedAt: 0
+                }
+            }
+        };
+
+        let rtdbInstance = null;
+        let firestoreInstance = null;
+        let broadcastChannel = null;
+        let latestPolaroidDataUrl = null;
+
+        /* =============================================================
+           2. INITIALIZATION & AUTO-CONNECT FIREBASE
+           ============================================================= */
+        window.addEventListener('DOMContentLoaded', () => {
+            initAmbientCanvas();
+            parseUrlParameters();
+            setupLocalSyncChannel();
+            renderAllKrathongs();
+            updateUI();
+
+            if (window.FirebaseSDK) {
+                window.bootFirebaseAutoConnect();
+            }
+        });
+
+        function parseUrlParameters() {
+            const params = new URLSearchParams(window.location.search);
+            const urlUser = (params.get('user') || params.get('role') || '').toLowerCase();
+
+            if (urlUser === 'katoon' || urlUser === 'arm') {
+                appState.myRole = urlUser;
+            } else {
+                appState.myRole = 'arm';
+            }
+
+            selectRole(appState.myRole, true);
+        }
+
+        window.bootFirebaseAutoConnect = async function(customRtdbUrl = null) {
+            if (!window.FirebaseSDK) return;
+            const { initializeApp, getDatabase, ref, onValue, getFirestore, doc, onSnapshot } = window.FirebaseSDK;
+
+            const savedCustomUrl = customRtdbUrl || localStorage.getItem('lk_custom_rtdb_url');
+            if (savedCustomUrl) {
+                document.getElementById('customDbUrlInput').value = savedCustomUrl;
+            }
+
+            const urlsToTry = savedCustomUrl ? [savedCustomUrl, ...RTDB_CANDIDATE_URLS] : RTDB_CANDIDATE_URLS;
+            let connectedRtdb = false;
+
+            // 1. Probe Firebase Realtime Database URLs first (Fastest sub-100ms hold sync)
+            for (const candidateUrl of urlsToTry) {
+                try {
+                    const testRes = await Promise.race([
+                        fetch(`${candidateUrl.replace(/\/$/, '')}/.json`),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3500))
+                    ]);
+
+                    // Status 200 or 401/403 means the RTDB instance exists at this region URL
+                    if (testRes && (testRes.ok || testRes.status === 401 || testRes.status === 403)) {
+                        const app = initializeApp({ ...DEFAULT_FIREBASE_CONFIG, databaseURL: candidateUrl }, 'LoyKrathongRTDB_' + Date.now());
+                        rtdbInstance = getDatabase(app);
+                        appState.syncBackend = 'rtdb';
+                        connectedRtdb = true;
+
+                        const roomRef = ref(rtdbInstance, `rooms/${PRIVATE_ROOM_ID}`);
+                        onValue(roomRef, (snapshot) => {
+                            handleRemoteRoomData(snapshot.val());
+                        });
+
+                        document.getElementById('activeBackendLabel').textContent = `โหมดซิงก์: Realtime Database (${candidateUrl})`;
+                        broadcastMyState();
+                        updateUI();
+                        break;
+                    }
+                } catch (e) {
+                    // Try next region URL
+                }
+            }
+
+            // 2. Seamless Fallback to Cloud Firestore (Works out-of-the-box with projectId alone!)
+            if (!connectedRtdb) {
+                try {
+                    const fsApp = initializeApp(DEFAULT_FIREBASE_CONFIG, 'LoyKrathongFirestore_' + Date.now());
+                    firestoreInstance = getFirestore(fsApp);
+                    appState.syncBackend = 'firestore';
+
+                    const roomDocRef = doc(firestoreInstance, 'rooms', PRIVATE_ROOM_ID);
+                    onSnapshot(roomDocRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            handleRemoteRoomData(docSnap.data());
+                        } else {
+                            broadcastMyState();
+                        }
+                    });
+
+                    document.getElementById('activeBackendLabel').textContent = 'โหมดซิงก์: Cloud Firestore (loykrathongwthkatoon)';
+                    broadcastMyState();
+                    updateUI();
+                } catch (err) {
+                    console.warn('Firebase fallback to local channel:', err);
+                    appState.syncBackend = 'local';
+                    updateUI();
+                }
+            }
+        };
+
+        function handleRemoteRoomData(data) {
+            if (!data) {
+                broadcastMyState();
+                return;
+            }
+            const partnerRole = appState.myRole === 'arm' ? 'katoon' : 'arm';
+            if (data[partnerRole]) {
+                appState.players[partnerRole] = {
+                    ...appState.players[partnerRole],
+                    ...data[partnerRole],
+                    online: true
+                };
+            }
+
+            // Check if room was reset remotely
+            if (data.resetToken && data.resetToken !== window.lastHandledResetToken) {
+                window.lastHandledResetToken = data.resetToken;
+                applyLocalResetState();
+                return;
+            }
+
+            evaluateDualPrayState();
+
+            if (data.launched && !appState.launched) {
+                triggerLaunchTogether(true);
+            }
+            updateUI();
+        }
+
+        /* =============================================================
+           3. REAL-TIME SYNC BROADCASTER
+           ============================================================= */
+        function setupLocalSyncChannel() {
+            if (broadcastChannel) broadcastChannel.close();
+            broadcastChannel = new BroadcastChannel(PRIVATE_ROOM_ID);
+
+            broadcastChannel.onmessage = (event) => {
+                const { type, role, payload } = event.data;
+                if (role === appState.myRole) return;
+
+                if (type === 'STATE_UPDATE') {
+                    appState.players[role] = { ...appState.players[role], ...payload, online: true };
+                    evaluateDualPrayState();
+                    updateUI();
+                } else if (type === 'PING') {
+                    appState.players[role].online = true;
+                    broadcastMyState('PONG');
+                    updateUI();
+                } else if (type === 'PONG') {
+                    appState.players[role].online = true;
+                    updateUI();
+                } else if (type === 'LAUNCH') {
+                    if (!appState.launched) triggerLaunchTogether(true);
+                }
+            };
+
+            appState.players[appState.myRole].online = true;
+            broadcastMyState('PING');
+        }
+
+        function broadcastMyState(type = 'STATE_UPDATE') {
+            const me = appState.players[appState.myRole];
+
+            if (appState.syncBackend === 'rtdb' && rtdbInstance && window.FirebaseSDK) {
+                const { update, ref } = window.FirebaseSDK;
+                update(ref(rtdbInstance, `rooms/${PRIVATE_ROOM_ID}/${appState.myRole}`), me)
+                    .catch(err => console.error('RTDB write error:', err));
+            } else if (appState.syncBackend === 'firestore' && firestoreInstance && window.FirebaseSDK) {
+                const { setDoc, doc } = window.FirebaseSDK;
+                setDoc(doc(firestoreInstance, 'rooms', PRIVATE_ROOM_ID), { [appState.myRole]: me }, { merge: true })
+                    .catch(err => console.error('Firestore write error:', err));
+            }
+
+            if (broadcastChannel) {
+                broadcastChannel.postMessage({ type, role: appState.myRole, payload: me });
+            }
+        }
+
+        /* =============================================================
+           4. PARTNER SIMULATOR (ทดสอบลอยคู่คนเดียวได้ทันที)
+           ============================================================= */
+        function togglePartnerBot() {
+            appState.botActive = !appState.botActive;
+            const partnerRole = appState.myRole === 'arm' ? 'katoon' : 'arm';
+            const btnLabel = document.getElementById('botBtnLabel');
+
+            if (appState.botActive) {
+                btnLabel.textContent = 'ปิดจำลอง';
+                appState.players[partnerRole] = {
+                    online: true,
+                    name: partnerRole === 'katoon' ? 'การ์ตูน' : 'อาร์ม',
+                    base: partnerRole === 'katoon' ? 'lotus' : 'banana',
+                    decor: partnerRole === 'katoon' ? 'hearts' : 'ring',
+                    wish: partnerRole === 'katoon' ? WISHES_FOR_KATOON[0] : WISHES_FOR_ARM[0],
+                    ready: true,
+                    holding: false,
+                    lastReleasedAt: 0
+                };
+                showToast(`จำลองฝั่ง ${appState.players[partnerRole].name} ออนไลน์แล้ว!`);
+            } else {
+                btnLabel.textContent = 'จำลองอีกฝ่าย';
+                appState.players[partnerRole].online = false;
+                appState.players[partnerRole].ready = false;
+                appState.players[partnerRole].holding = false;
+                showToast("ปิดโหมดจำลองแล้ว");
+            }
+            updateUI();
+        }
+
+        /* =============================================================
+           5. ROLE & STAGE FLOW
+           ============================================================= */
+        function selectRole(role, silent = false) {
+            const oldRole = appState.myRole;
+            appState.myRole = role;
+
+            const armBtn = document.getElementById('roleArmBtn');
+            const katoonBtn = document.getElementById('roleKatoonBtn');
+
+            if (role === 'arm') {
+                armBtn.className = "p-3.5 rounded-2xl border-2 border-amberGlow bg-amberGlow/15 text-center transition flex flex-col items-center gap-1";
+                katoonBtn.className = "p-3.5 rounded-2xl border border-white/15 bg-night-900/55 text-center hover:border-peachRose/50 transition flex flex-col items-center gap-1";
+                document.getElementById('copyLinkBtnLabel').textContent = "คัดลอกลิงก์ส่งให้การ์ตูน";
+                document.getElementById('startStage2Label').textContent = "เริ่มทำกระทงของ อาร์ม";
+            } else {
+                katoonBtn.className = "p-3.5 rounded-2xl border-2 border-peachRose bg-peachRose/15 text-center transition flex flex-col items-center gap-1";
+                armBtn.className = "p-3.5 rounded-2xl border border-white/15 bg-night-900/55 text-center hover:border-amberGlow/50 transition flex flex-col items-center gap-1";
+                document.getElementById('copyLinkBtnLabel').textContent = "คัดลอกลิงก์ส่งให้อาร์ม";
+                document.getElementById('startStage2Label').textContent = "เริ่มทำกระทงของ การ์ตูน";
+            }
+
+            if (!silent) {
+                appState.players[oldRole].online = false;
+                appState.players[role].online = true;
+                broadcastMyState('PING');
+                updateUI();
+            }
+        }
+
+        function copyInviteLink() {
+            const url = new URL(window.location.href);
+            const targetUser = appState.myRole === 'arm' ? 'katoon' : 'arm';
+            const targetName = targetUser === 'katoon' ? 'การ์ตูน' : 'อาร์ม';
+            url.searchParams.delete('role');
+            url.searchParams.set('user', targetUser);
+
+            const tempInput = document.createElement('input');
+            tempInput.value = url.toString();
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast(`คัดลอกลิงก์ส่งให้ ${targetName} เรียบร้อยแล้ว!`);
+        }
+
+        function goToStage(stageNum) {
+            appState.stage = stageNum;
+            ['stage1', 'stage2', 'stage3', 'stage4'].forEach((id, idx) => {
+                const el = document.getElementById(id);
+                if (idx + 1 === stageNum) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+
+            if (stageNum === 2) {
+                const me = appState.players[appState.myRole];
+                document.getElementById('previewOwnerTag').textContent = `✨ กระทงของ ${me.name} ✨`;
+                document.getElementById('wishInputLabel').textContent = `3. คำอธิษฐานของ ${me.name}`;
+                document.getElementById('inputWish').value = me.wish;
+                document.getElementById('wishCharCount').textContent = me.wish.length;
+                syncOptionButtons();
+                renderPreviewKrathong();
+            }
+
+            if (stageNum === 4) {
+                document.getElementById('skyInteractiveLayer').classList.remove('hidden');
+                spawnHeartFirework();
+                setTimeout(spawnSkyLantern, 600);
+            } else {
+                document.getElementById('skyInteractiveLayer').classList.add('hidden');
+            }
+
+            updateUI();
+        }
+
+        /* =============================================================
+           6. KRATHONG CUSTOMIZATION & SVG GENERATOR
+           ============================================================= */
+        function setKrathongOption(type, value) {
+            appState.players[appState.myRole][type] = value;
+            syncOptionButtons();
+            renderPreviewKrathong();
+            broadcastMyState();
+        }
+
+        function syncOptionButtons() {
+            const me = appState.players[appState.myRole];
+            document.querySelectorAll('.opt-base').forEach(btn => {
+                const active = btn.dataset.val === me.base;
+                btn.classList.toggle('border-amberGlow', active);
+                btn.classList.toggle('bg-amberGlow/20', active);
+                btn.classList.toggle('border-white/10', !active);
+                btn.classList.toggle('bg-night-900/60', !active);
+            });
+            document.querySelectorAll('.opt-decor').forEach(btn => {
+                const active = btn.dataset.val === me.decor;
+                btn.classList.toggle('border-amberGlow', active);
+                btn.classList.toggle('bg-amberGlow/20', active);
+                btn.classList.toggle('border-white/10', !active);
+                btn.classList.toggle('bg-night-900/60', !active);
+            });
+        }
+
+        function syncMyDraft() {
+            const wishVal = document.getElementById('inputWish').value;
+            document.getElementById('wishCharCount').textContent = wishVal.length;
+            const defaultWish = appState.myRole === 'arm' ? WISHES_FOR_ARM[0] : WISHES_FOR_KATOON[0];
+            appState.players[appState.myRole].wish = wishVal.trim() || defaultWish;
+            broadcastMyState();
+        }
+
+        function randomRomanticWish() {
+            const pool = appState.myRole === 'arm' ? WISHES_FOR_ARM : WISHES_FOR_KATOON;
+            const current = document.getElementById('inputWish').value;
+            let pick = pool[Math.floor(Math.random() * pool.length)];
+            if (pick === current) pick = pool[(pool.indexOf(pick) + 1) % pool.length];
+            document.getElementById('inputWish').value = pick;
+            syncMyDraft();
+        }
+
+        function confirmReadyToFloat() {
+            syncMyDraft();
+            appState.players[appState.myRole].ready = true;
+            broadcastMyState();
+            goToStage(3);
+        }
+
+        function backToEdit() {
+            appState.players[appState.myRole].ready = false;
+            appState.players[appState.myRole].holding = false;
+            appState.bothPrayedTogether = false;
+            broadcastMyState();
+            goToStage(2);
+        }
+
+        function renderPreviewKrathong() {
+            const me = appState.players[appState.myRole];
+            document.getElementById('previewKrathongContainer').innerHTML = buildKrathongSVG(me.base, me.decor);
+        }
+
+        function renderAllKrathongs() {
+            const arm = appState.players.arm;
+            const katoon = appState.players.katoon;
+            const armSvg = buildKrathongSVG(arm.base, arm.decor);
+            const katoonSvg = buildKrathongSVG(katoon.base, katoon.decor);
+
+            document.getElementById('pierKrathongArm').innerHTML = armSvg;
+            document.getElementById('pierKrathongKatoon').innerHTML = katoonSvg;
+            document.getElementById('riverKrathongArm').innerHTML = armSvg;
+            document.getElementById('riverKrathongKatoon').innerHTML = katoonSvg;
+        }
+
+        function buildKrathongSVG(base = 'banana', decor = 'classic') {
+            let baseSvg = '';
+            if (base === 'banana') {
+                baseSvg = `
+                    <ellipse cx="100" cy="145" rx="68" ry="22" fill="#1B4332"/>
+                    <path d="M32 142 Q45 108 60 140 Q75 102 90 140 Q100 98 110 140 Q125 102 140 140 Q155 108 168 142 Q155 166 100 168 Q45 166 32 142 Z" fill="#2D6A4F" stroke="#52B788" stroke-width="1.5"/>
+                    <path d="M44 146 Q62 118 80 146 Q100 112 120 146 Q138 118 156 146 Q138 165 100 166 Q62 165 44 146 Z" fill="#40916C"/>
+                `;
+            } else if (base === 'lotus') {
+                baseSvg = `
+                    <ellipse cx="100" cy="146" rx="66" ry="20" fill="#9D174D"/>
+                    <path d="M30 142 Q48 102 72 138 Q100 95 128 138 Q152 102 170 142 Q145 168 100 168 Q55 168 30 142 Z" fill="#F472B6" stroke="#FBCFE8" stroke-width="1.5"/>
+                    <path d="M48 145 Q72 112 100 142 Q128 112 152 145 Q130 165 100 166 Q70 165 48 145 Z" fill="#F9A8D4"/>
+                `;
+            } else if (base === 'bread') {
+                baseSvg = `
+                    <path d="M100 168 C45 152 32 116 64 112 C82 110 94 122 100 130 C106 122 118 110 136 112 C168 116 155 152 100 168 Z" fill="#D97706" stroke="#FCD34D" stroke-width="2"/>
+                    <path d="M100 161 C55 147 45 120 68 117 C83 115 93 125 100 132 C107 125 117 115 132 117 C155 120 145 147 100 161 Z" fill="#FBBF24"/>
+                `;
+            } else if (base === 'coconut') {
+                baseSvg = `
+                    <path d="M36 134 C36 164 164 164 164 134 Z" fill="#5C3A21" stroke="#8D5B4C" stroke-width="2"/>
+                    <ellipse cx="100" cy="134" rx="64" ry="14" fill="#7F4F24" stroke="#DDB892" stroke-width="1.5"/>
+                `;
+            }
+
+            let decorSvg = '';
+            if (decor === 'classic') {
+                decorSvg = `
+                    <circle cx="65" cy="136" r="10" fill="#F59E0B"/><circle cx="65" cy="136" r="5" fill="#FDE047"/>
+                    <circle cx="135" cy="136" r="10" fill="#F59E0B"/><circle cx="135" cy="136" r="5" fill="#FDE047"/>
+                    <circle cx="84" cy="142" r="9" fill="#FB7185"/><circle cx="116" cy="142" r="9" fill="#FB7185"/>
+                `;
+            } else if (decor === 'hearts') {
+                decorSvg = `
+                    <path d="M72 138 C62 128 62 116 72 122 C82 116 82 128 72 138 Z" fill="#FF4D6D"/>
+                    <path d="M128 138 C118 128 118 116 128 122 C138 116 138 128 128 138 Z" fill="#FF8FA3"/>
+                    <circle cx="100" cy="143" r="7" fill="#FDE047"/>
+                `;
+            } else if (decor === 'ring') {
+                decorSvg = `
+                    <circle cx="100" cy="138" r="13" fill="none" stroke="#FDE047" stroke-width="3.5"/>
+                    <polygon points="100,117 107,124 100,130 93,124" fill="#BAE6FD" stroke="#FFFFFF" stroke-width="1"/>
+                    <circle cx="68" cy="139" r="7" fill="#F472B6"/>
+                    <circle cx="132" cy="139" r="7" fill="#F472B6"/>
+                `;
+            } else if (decor === 'stars') {
+                decorSvg = `
+                    <polygon points="70,122 73,130 81,130 75,135 77,143 70,138 63,143 65,135 59,130 67,130" fill="#FDE047"/>
+                    <polygon points="130,122 133,130 141,130 135,135 137,143 130,138 123,143 125,135 119,130 127,130" fill="#FDE047"/>
+                `;
+            }
+
+            return `
+                <svg xmlns="http://www.w3.org/2000/svg" width="200" height="185" viewBox="0 0 200 185" class="w-full h-full overflow-visible">
+                    <defs>
+                        <radialGradient id="candleAura" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#FFD166" stop-opacity="0.65"/>
+                            <stop offset="100%" stop-color="#FFD166" stop-opacity="0"/>
+                        </radialGradient>
+                    </defs>
+                    <circle cx="100" cy="68" r="46" fill="url(#candleAura)"/>
+                    <line x1="92" y1="132" x2="86" y2="78" stroke="#A16207" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="100" y1="132" x2="100" y2="74" stroke="#A16207" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="108" y1="132" x2="114" y2="78" stroke="#A16207" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="86" cy="77" r="2" fill="#FB7185"/>
+                    <circle cx="100" cy="73" r="2" fill="#FB7185"/>
+                    <circle cx="114" cy="77" r="2" fill="#FB7185"/>
+                    <rect x="95" y="92" width="10" height="42" rx="3" fill="#FEF08A" stroke="#F59E0B" stroke-width="1"/>
+                    <g class="animate-candle-flicker" style="transform-origin: 100px 88px;">
+                        <path d="M100 66 C108 78 107 89 100 91 C93 89 92 78 100 66 Z" fill="#F97316"/>
+                        <path d="M100 72 C104 80 104 87 100 89 C96 87 96 80 100 72 Z" fill="#FEF9C3"/>
+                    </g>
+                    ${baseSvg}
+                    ${decorSvg}
+                </svg>
+            `;
+        }
+
+        /* =============================================================
+           7. SYNCHRONIZED HOLD-TOGETHER "อธิษฐาน" & SIMULTANEOUS RELEASE
+           ============================================================= */
+        let botMirrorTimeout = null;
+
+        function startHolding(e) {
+            if (e) e.preventDefault();
+            if (appState.launched) return;
+
+            appState.players[appState.myRole].holding = true;
+            appState.players[appState.myRole].lastReleasedAt = 0;
+
+            if (appState.botActive) {
+                const partnerRole = appState.myRole === 'arm' ? 'katoon' : 'arm';
+                clearTimeout(botMirrorTimeout);
+                botMirrorTimeout = setTimeout(() => {
+                    appState.players[partnerRole].holding = true;
+                    appState.players[partnerRole].lastReleasedAt = 0;
+                    evaluateDualPrayState();
+                    updateUI();
+                }, 350);
+            }
+
+            if (navigator.vibrate) navigator.vibrate(45);
+            evaluateDualPrayState();
+            broadcastMyState();
+            updateUI();
+        }
+
+        function stopHolding() {
+            if (appState.launched) return;
+            const wasHolding = appState.players[appState.myRole].holding;
+            if (!wasHolding) return;
+
+            const now = Date.now();
+            const partnerRole = appState.myRole === 'arm' ? 'katoon' : 'arm';
+            const partner = appState.players[partnerRole];
+            const wasPrayingTogether = appState.bothPrayedTogether || (appState.players.arm.holding && appState.players.katoon.holding);
+
+            appState.players[appState.myRole].holding = false;
+            appState.players[appState.myRole].lastReleasedAt = now;
+
+            if (appState.botActive) {
+                clearTimeout(botMirrorTimeout);
+                appState.players[partnerRole].holding = false;
+                appState.players[partnerRole].lastReleasedAt = now;
+            }
+
+            broadcastMyState();
+
+            // Check if both prayed together and released simultaneously (within 1.8s network tolerance window)
+            if (wasPrayingTogether) {
+                const partnerJustReleased = !partner.holding && (now - (partner.lastReleasedAt || 0) < 1800);
+                if (partnerJustReleased || appState.botActive) {
+                    if (navigator.vibrate) navigator.vibrate([70, 40, 120]);
+                    triggerLaunchTogether();
+                    return;
+                } else {
+                    // Partner is about to release within milliseconds; wait briefly for their release event
+                    document.getElementById('holdFeedbackText').textContent = `✨ ปล่อยนิ้วแล้ว! รอ ${partner.name} ปล่อยนิ้วพร้อมกัน...`;
+                }
+            }
+
+            evaluateDualPrayState();
+            updateUI();
+        }
+
+        function evaluateDualPrayState() {
+            if (appState.launched) return;
+            const arm = appState.players.arm;
+            const katoon = appState.players.katoon;
+            const now = Date.now();
+
+            const bothHoldingNow = arm.holding && katoon.holding;
+            if (bothHoldingNow) {
+                appState.bothPrayedTogether = true;
+                appState.lastDualHoldTimestamp = now;
+            }
+
+            // If both were just praying together and both have now released within 1.8s window -> Launch!
+            if (appState.bothPrayedTogether && !arm.holding && !katoon.holding) {
+                const armRel = arm.lastReleasedAt || now;
+                const katoonRel = katoon.lastReleasedAt || now;
+                if (Math.abs(armRel - katoonRel) <= 2200 && (now - appState.lastDualHoldTimestamp) < 15000) {
+                    triggerLaunchTogether();
+                }
+            }
+        }
+
+        function triggerLaunchTogether(fromRemote = false) {
+            if (appState.launched) return;
+            appState.launched = true;
+
+            if (!fromRemote) {
+                if (appState.syncBackend === 'rtdb' && rtdbInstance && window.FirebaseSDK) {
+                    const { update, ref } = window.FirebaseSDK;
+                    update(ref(rtdbInstance, `rooms/${PRIVATE_ROOM_ID}`), { launched: true });
+                } else if (appState.syncBackend === 'firestore' && firestoreInstance && window.FirebaseSDK) {
+                    const { setDoc, doc } = window.FirebaseSDK;
+                    setDoc(doc(firestoreInstance, 'rooms', PRIVATE_ROOM_ID), { launched: true }, { merge: true });
+                }
+                if (broadcastChannel) {
+                    broadcastChannel.postMessage({ type: 'LAUNCH', role: appState.myRole });
+                }
+            }
+
+            playChimeSound();
+            goToStage(4);
+        }
+
+        /* =============================================================
+           8. UI STATE UPDATE
+           ============================================================= */
+        function updateUI() {
+            renderAllKrathongs();
+
+            const partnerRole = appState.myRole === 'arm' ? 'katoon' : 'arm';
+            const me = appState.players[appState.myRole];
+            const partner = appState.players[partnerRole];
+            const arm = appState.players.arm;
+            const katoon = appState.players.katoon;
+
+            // Top Sync Pill
+            const syncDot = document.getElementById('syncDot');
+            const syncModeText = document.getElementById('syncModeText');
+            if (partner.online) {
+                syncDot.className = "w-2 h-2 rounded-full bg-emerald-400";
+                syncModeText.textContent = "เชื่อมต่อออนไลน์แล้ว (Arm & Katoon) ❤️";
+            } else {
+                syncDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+                syncModeText.textContent = `เชื่อมต่อออนไลน์แล้ว • รอ ${partner.name}`;
+            }
+
+            // Stage 1 Presence
+            const pIcon = document.getElementById('partnerAvatarIcon');
+            const pTitle = document.getElementById('partnerStatusTitle');
+            const pSub = document.getElementById('partnerStatusSub');
+            if (partner.online) {
+                pIcon.textContent = "🥰";
+                pIcon.className = "w-9 h-9 rounded-full bg-peachRose/25 flex items-center justify-center text-base shrink-0";
+                pTitle.textContent = `${partner.name} เข้ามาในหน้าเว็บแล้ว!`;
+                pSub.textContent = "กดปุ่มด้านล่างเพื่อเริ่มประดิษฐ์กระทงด้วยกันเลย";
+            } else {
+                pIcon.textContent = "⏳";
+                pIcon.className = "w-9 h-9 rounded-full bg-slate-700/80 flex items-center justify-center text-base shrink-0";
+                pTitle.textContent = `กำลังรอ ${partner.name} เข้ามา...`;
+                pSub.textContent = `กดคัดลอกลิงก์ส่งให้ ${partner.name} หรือกด 'จำลองอีกฝ่าย'`;
+            }
+
+            // Stage 2 Hint
+            const s2Hint = document.getElementById('stage2PartnerHint');
+            if (!partner.online) {
+                s2Hint.textContent = `รอ ${partner.name} เข้ามา...`;
+            } else if (partner.ready) {
+                s2Hint.textContent = `${partner.name} แต่งเสร็จแล้ว รอที่ริมน้ำ!`;
+            } else {
+                s2Hint.textContent = `${partner.name} กำลังตั้งใจแต่งกระทง...`;
+            }
+
+            // Stage 3 Pier Statuses & "อธิษฐาน" Dual-Hold Banner
+            document.getElementById('pierDotArm').className = `w-2 h-2 rounded-full ${arm.online ? 'bg-emerald-400' : 'bg-slate-500'}`;
+            document.getElementById('pierStateArm').textContent = arm.holding ? '✨ กำลังกดค้างอธิษฐาน!' : (arm.ready ? 'พร้อมลอยแล้ว' : 'กำลังแต่งกระทง...');
+
+            document.getElementById('pierDotKatoon').className = `w-2 h-2 rounded-full ${katoon.online ? 'bg-emerald-400' : 'bg-slate-500'}`;
+            document.getElementById('pierStateKatoon').textContent = katoon.holding ? '✨ กำลังกดค้างอธิษฐาน!' : (katoon.ready ? 'พร้อมลอยแล้ว' : 'รอการ์ตูนเข้ามา...');
+
+            const prayBanner = document.getElementById('prayTogetherBanner');
+            const holdAuraRing = document.getElementById('holdAuraRing');
+            const holdFeedbackText = document.getElementById('holdFeedbackText');
+            const holdBtnMainText = document.getElementById('holdBtnMainText');
+
+            if (arm.holding && katoon.holding) {
+                prayBanner.classList.remove('hidden');
+                holdAuraRing.className = "absolute inset-0 rounded-full border-4 border-amberGlow shadow-[0_0_30px_rgba(255,209,102,0.85)] scale-110 transition-all duration-300";
+                holdBtnMainText.innerHTML = "กำลัง<br>อธิษฐาน";
+                holdFeedbackText.textContent = "💖 ตั้งจิตอธิษฐานพร้อมกัน... เมื่อพร้อมแล้วให้ปล่อยนิ้วพร้อมกันเลย!";
+            } else if (me.holding) {
+                prayBanner.classList.add('hidden');
+                holdAuraRing.className = "absolute inset-0 rounded-full border-4 border-peachRose/70 animate-ping transition-all duration-300";
+                holdBtnMainText.innerHTML = "รออีกฝ่าย<br>กดค้าง";
+                holdFeedbackText.textContent = `⏳ กำลังกดค้างอยู่... รอ ${partner.name} กดค้างพร้อมกัน`;
+            } else if (partner.holding) {
+                prayBanner.classList.add('hidden');
+                holdAuraRing.className = "absolute inset-0 rounded-full border-4 border-amberGlow/70 animate-pulse transition-all duration-300";
+                holdBtnMainText.innerHTML = "กดค้างไว้<br>พร้อมกัน";
+                holdFeedbackText.textContent = `✨ ${partner.name} กดค้างรออยู่แล้ว! รีบกดปุ่มค้างพร้อมกันเลย`;
+            } else {
+                prayBanner.classList.add('hidden');
+                holdAuraRing.className = "absolute inset-0 rounded-full border-4 border-white/15 transition-all duration-300";
+                holdBtnMainText.innerHTML = "กดค้างไว้<br>พร้อมกัน";
+                holdFeedbackText.textContent = "แตะค้างที่ปุ่มพร้อมกันเพื่อขึ้นคำว่า \"อธิษฐาน\" แล้วปล่อยนิ้วพร้อมกัน";
+            }
+
+            const soloBtn = document.getElementById('btnSoloOverride');
+            if (!partner.online) soloBtn.classList.remove('hidden');
+            else soloBtn.classList.add('hidden');
+        }
+
+        /* =============================================================
+           9. HIGH-RES ROMANTIC POLAROID MEMORY CARD GENERATOR
+           ============================================================= */
+        function openWishCard(role) {
+            const p = appState.players[role];
+            document.getElementById('wishModalName').textContent = p.name;
+            document.getElementById('wishModalText').textContent = `"${p.wish}"`;
+            const modal = document.getElementById('wishModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function wrapThaiText(ctx, text, maxWidth) {
+            const lines = [];
+            const paragraphs = text.split(/\r?\n/);
+            const segmenter = (typeof Intl !== 'undefined' && Intl.Segmenter)
+                ? new Intl.Segmenter('th', { granularity: 'word' })
+                : null;
+
+            paragraphs.forEach(para => {
+                if (!para.trim()) {
+                    lines.push('');
+                    return;
+                }
+                const tokens = segmenter
+                    ? Array.from(segmenter.segment(para)).map(s => s.segment)
+                    : Array.from(para);
+
+                let currentLine = '';
+                tokens.forEach(token => {
+                    const testLine = currentLine + token;
+                    if (ctx.measureText(testLine).width > maxWidth && currentLine !== '') {
+                        lines.push(currentLine.trimEnd());
+                        currentLine = token.trimStart();
+                    } else {
+                        currentLine = testLine;
+                    }
+                });
+                if (currentLine) lines.push(currentLine.trimEnd());
+            });
+
+            return lines;
+        }
+
+        function drawKrathongOnCanvas(ctx, cx, cy, scale, base, decor) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(scale, scale);
+
+            // 1. Candle Warm Aura
+            const aura = ctx.createRadialGradient(0, -32, 4, 0, -32, 58);
+            aura.addColorStop(0, 'rgba(255, 209, 102, 0.78)');
+            aura.addColorStop(1, 'rgba(255, 209, 102, 0)');
+            ctx.fillStyle = aura;
+            ctx.beginPath();
+            ctx.arc(0, -32, 58, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 2. Incense Sticks
+            ctx.strokeStyle = '#B45309';
+            ctx.lineWidth = 2.4;
+            ctx.lineCap = 'round';
+            [[-8, -22], [0, -26], [8, -22]].forEach(([tx, ty]) => {
+                ctx.beginPath();
+                ctx.moveTo(tx * 0.6, 30);
+                ctx.lineTo(tx, ty);
+                ctx.stroke();
+
+                ctx.fillStyle = '#FB7185';
+                ctx.beginPath();
+                ctx.arc(tx, ty - 1, 2.3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // 3. Candle Body
+            ctx.fillStyle = '#FEF08A';
+            ctx.strokeStyle = '#F59E0B';
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.roundRect(-5.5, -8, 11, 42, 3);
+            ctx.fill();
+            ctx.stroke();
+
+            // 4. Candle Flame
+            ctx.fillStyle = '#F97316';
+            ctx.beginPath();
+            ctx.moveTo(0, -34);
+            ctx.quadraticCurveTo(9, -20, 0, -9);
+            ctx.quadraticCurveTo(-9, -20, 0, -34);
+            ctx.fill();
+
+            ctx.fillStyle = '#FEF9C3';
+            ctx.beginPath();
+            ctx.moveTo(0, -28);
+            ctx.quadraticCurveTo(4.5, -19, 0, -11);
+            ctx.quadraticCurveTo(-4.5, -19, 0, -28);
+            ctx.fill();
+
+            // 5. Krathong Base
+            if (base === 'banana') {
+                ctx.fillStyle = '#1B4332';
+                ctx.beginPath();
+                ctx.ellipse(0, 45, 68, 22, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#2D6A4F';
+                ctx.strokeStyle = '#52B788';
+                ctx.lineWidth = 1.8;
+                ctx.beginPath();
+                ctx.moveTo(-68, 42);
+                ctx.quadraticCurveTo(-55, 8, -40, 40);
+                ctx.quadraticCurveTo(-25, 2, -10, 40);
+                ctx.quadraticCurveTo(0, -2, 10, 40);
+                ctx.quadraticCurveTo(25, 2, 40, 40);
+                ctx.quadraticCurveTo(55, 8, 68, 42);
+                ctx.quadraticCurveTo(55, 66, 0, 68);
+                ctx.quadraticCurveTo(-55, 66, -68, 42);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#40916C';
+                ctx.beginPath();
+                ctx.moveTo(-56, 46);
+                ctx.quadraticCurveTo(-38, 18, -20, 46);
+                ctx.quadraticCurveTo(0, 12, 20, 46);
+                ctx.quadraticCurveTo(38, 18, 56, 46);
+                ctx.quadraticCurveTo(38, 65, 0, 66);
+                ctx.quadraticCurveTo(-38, 65, -56, 46);
+                ctx.fill();
+            } else if (base === 'lotus') {
+                ctx.fillStyle = '#9D174D';
+                ctx.beginPath();
+                ctx.ellipse(0, 46, 66, 20, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#F472B6';
+                ctx.strokeStyle = '#FBCFE8';
+                ctx.lineWidth = 1.8;
+                ctx.beginPath();
+                ctx.moveTo(-70, 42);
+                ctx.quadraticCurveTo(-52, 2, -28, 38);
+                ctx.quadraticCurveTo(0, -5, 28, 38);
+                ctx.quadraticCurveTo(52, 2, 70, 42);
+                ctx.quadraticCurveTo(45, 68, 0, 68);
+                ctx.quadraticCurveTo(-45, 68, -70, 42);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#F9A8D4';
+                ctx.beginPath();
+                ctx.moveTo(-52, 45);
+                ctx.quadraticCurveTo(-28, 12, 0, 42);
+                ctx.quadraticCurveTo(28, 12, 52, 45);
+                ctx.quadraticCurveTo(30, 65, 0, 66);
+                ctx.quadraticCurveTo(-30, 65, -52, 45);
+                ctx.fill();
+            } else if (base === 'bread') {
+                ctx.fillStyle = '#D97706';
+                ctx.strokeStyle = '#FCD34D';
+                ctx.lineWidth = 2.2;
+                ctx.beginPath();
+                ctx.moveTo(0, 68);
+                ctx.bezierCurveTo(-55, 52, -68, 16, -36, 12);
+                ctx.bezierCurveTo(-18, 10, -6, 22, 0, 30);
+                ctx.bezierCurveTo(6, 22, 18, 10, 36, 12);
+                ctx.bezierCurveTo(68, 16, 55, 52, 0, 68);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#FBBF24';
+                ctx.beginPath();
+                ctx.moveTo(0, 61);
+                ctx.bezierCurveTo(-45, 47, -55, 20, -32, 17);
+                ctx.bezierCurveTo(-17, 15, -7, 25, 0, 32);
+                ctx.bezierCurveTo(7, 25, 17, 15, 32, 17);
+                ctx.bezierCurveTo(55, 20, 45, 47, 0, 61);
+                ctx.fill();
+            } else if (base === 'coconut') {
+                ctx.fillStyle = '#5C3A21';
+                ctx.strokeStyle = '#8D5B4C';
+                ctx.lineWidth = 2.2;
+                ctx.beginPath();
+                ctx.moveTo(-64, 34);
+                ctx.bezierCurveTo(-64, 66, 64, 66, 64, 34);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#7F4F24';
+                ctx.strokeStyle = '#DDB892';
+                ctx.lineWidth = 1.6;
+                ctx.beginPath();
+                ctx.ellipse(0, 34, 64, 14, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // 6. Decorations
+            if (decor === 'classic') {
+                [[-35, 36], [35, 36]].forEach(([fx, fy]) => {
+                    ctx.fillStyle = '#F59E0B';
+                    ctx.beginPath(); ctx.arc(fx, fy, 10, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#FDE047';
+                    ctx.beginPath(); ctx.arc(fx, fy, 5, 0, Math.PI * 2); ctx.fill();
+                });
+                [[-16, 42], [16, 42]].forEach(([fx, fy]) => {
+                    ctx.fillStyle = '#FB7185';
+                    ctx.beginPath(); ctx.arc(fx, fy, 9, 0, Math.PI * 2); ctx.fill();
+                });
+            } else if (decor === 'hearts') {
+                const drawMiniHeart = (hx, hy, color) => {
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.moveTo(hx, hy + 8);
+                    ctx.bezierCurveTo(hx - 12, hy - 2, hx - 12, hy - 14, hx, hy - 8);
+                    ctx.bezierCurveTo(hx + 12, hy - 14, hx + 12, hy - 2, hx, hy + 8);
+                    ctx.fill();
+                };
+                drawMiniHeart(-28, 30, '#FF4D6D');
+                drawMiniHeart(28, 30, '#FF8FA3');
+                ctx.fillStyle = '#FDE047';
+                ctx.beginPath(); ctx.arc(0, 43, 7, 0, Math.PI * 2); ctx.fill();
+            } else if (decor === 'ring') {
+                ctx.strokeStyle = '#FDE047';
+                ctx.lineWidth = 3.8;
+                ctx.beginPath(); ctx.arc(0, 38, 13, 0, Math.PI * 2); ctx.stroke();
+
+                ctx.fillStyle = '#BAE6FD';
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = 1.2;
+                ctx.beginPath();
+                ctx.moveTo(0, 17); ctx.lineTo(7, 24); ctx.lineTo(0, 30); ctx.lineTo(-7, 24);
+                ctx.closePath();
+                ctx.fill(); ctx.stroke();
+
+                ctx.fillStyle = '#F472B6';
+                ctx.beginPath(); ctx.arc(-32, 39, 7, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(32, 39, 7, 0, Math.PI * 2); ctx.fill();
+            } else if (decor === 'stars') {
+                const drawStar = (sx, sy) => {
+                    ctx.fillStyle = '#FDE047';
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const a1 = (i * 72 - 90) * Math.PI / 180;
+                        const a2 = (i * 72 - 54) * Math.PI / 180;
+                        if (i === 0) ctx.moveTo(sx + Math.cos(a1) * 11, sy + Math.sin(a1) * 11);
+                        else ctx.lineTo(sx + Math.cos(a1) * 11, sy + Math.sin(a1) * 11);
+                        ctx.lineTo(sx + Math.cos(a2) * 5, sy + Math.sin(a2) * 5);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                };
+                drawStar(-30, 34);
+                drawStar(30, 34);
+            }
+
+            ctx.restore();
+        }
+
+        function openPolaroidModal() {
+            latestPolaroidDataUrl = generateHighResPolaroidDataUrl();
+            document.getElementById('polaroidPreviewImg').src = latestPolaroidDataUrl;
+
+            const modal = document.getElementById('polaroidModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function generateHighResPolaroidDataUrl() {
+            const arm = appState.players.arm;
+            const katoon = appState.players.katoon;
+
+            const cardWidth = 900;
+            const photoX = 45;
+            const photoY = 45;
+            const photoW = 810;
+            const photoH = 540;
+
+            // Measure wrapped wishes first to compute exact dynamic Polaroid height
+            const measureCanvas = document.createElement('canvas');
+            const mCtx = measureCanvas.getContext('2d');
+            mCtx.font = '500 24px Mali, sans-serif';
+            const textMaxWidth = 760;
+
+            const armWishLines = wrapThaiText(mCtx, `"${arm.wish}"`, textMaxWidth);
+            const katoonWishLines = wrapThaiText(mCtx, `"${katoon.wish}"`, textMaxWidth);
+
+            const lineHeight = 36;
+            const captionStartY = photoY + photoH + 64;
+            const armSectionHeight = 36 + armWishLines.length * lineHeight + 22;
+            const katoonSectionHeight = 36 + katoonWishLines.length * lineHeight + 28;
+            const footerHeight = 48;
+
+            const totalHeight = captionStartY + 88 + armSectionHeight + katoonSectionHeight + footerHeight;
+
+            // Create final crisp Polaroid canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = cardWidth;
+            canvas.height = totalHeight;
+            const ctx = canvas.getContext('2d');
+
+            // 1. Warm Polaroid Paper Background
+            ctx.fillStyle = '#FDFBF7';
+            ctx.fillRect(0, 0, cardWidth, totalHeight);
+
+            ctx.strokeStyle = '#E2E8F0';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(12, 12, cardWidth - 24, totalHeight - 24);
+
+            // 2. Photo Viewport Clip
+            ctx.save();
+            ctx.beginPath();
+            ctx.roundRect(photoX, photoY, photoW, photoH, 16);
+            ctx.clip();
+
+            // Rich Twilight Romantic Sky & River Gradient
+            const bgGrad = ctx.createLinearGradient(0, photoY, 0, photoY + photoH);
+            bgGrad.addColorStop(0, '#060918');
+            bgGrad.addColorStop(0.32, '#151B3B');
+            bgGrad.addColorStop(0.53, '#3B1E4A');
+            bgGrad.addColorStop(0.55, '#131D42');
+            bgGrad.addColorStop(1, '#080D21');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(photoX, photoY, photoW, photoH);
+
+            // Horizon Golden Sunset/Moonlight Glow
+            const horizonGlow = ctx.createRadialGradient(photoX + 520, photoY + 285, 20, photoX + 520, photoY + 285, 420);
+            horizonGlow.addColorStop(0, 'rgba(255, 209, 102, 0.25)');
+            horizonGlow.addColorStop(0.5, 'rgba(255, 143, 163, 0.12)');
+            horizonGlow.addColorStop(1, 'rgba(11, 16, 38, 0)');
+            ctx.fillStyle = horizonGlow;
+            ctx.fillRect(photoX, photoY, photoW, photoH);
+
+            // Twinkling Stars
+            ctx.fillStyle = '#FFFBEB';
+            for (let i = 0; i < 85; i++) {
+                const sx = photoX + ((i * 137) % photoW);
+                const sy = photoY + ((i * 73) % (photoH * 0.5));
+                const sr = (i % 4 === 0) ? 2.4 : 1.2;
+                ctx.globalAlpha = 0.35 + (i % 5) * 0.13;
+                ctx.beginPath();
+                ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+
+            // Full Moon
+            const moonX = photoX + 675;
+            const moonY = photoY + 112;
+            const moonGlow = ctx.createRadialGradient(moonX, moonY, 10, moonX, moonY, 135);
+            moonGlow.addColorStop(0, 'rgba(255, 243, 176, 0.95)');
+            moonGlow.addColorStop(0.42, 'rgba(255, 209, 102, 0.35)');
+            moonGlow.addColorStop(1, 'rgba(255, 209, 102, 0)');
+            ctx.fillStyle = moonGlow;
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, 135, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#FEF08A';
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, 48, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Floating Yi Peng Sky Lanterns
+            const drawCanvasLantern = (lx, ly, scale) => {
+                ctx.save();
+                ctx.translate(lx, ly);
+                ctx.scale(scale, scale);
+                const lg = ctx.createRadialGradient(0, 0, 2, 0, 0, 26);
+                lg.addColorStop(0, '#FFFBEB');
+                lg.addColorStop(0.5, 'rgba(245, 158, 11, 0.65)');
+                lg.addColorStop(1, 'rgba(245, 158, 11, 0)');
+                ctx.fillStyle = lg;
+                ctx.beginPath(); ctx.arc(0, 0, 26, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = '#FBBF24';
+                ctx.beginPath();
+                ctx.moveTo(-9, -13); ctx.lineTo(9, -13); ctx.lineTo(6, 11); ctx.lineTo(-6, 11);
+                ctx.closePath(); ctx.fill();
+                ctx.restore();
+            };
+            drawCanvasLantern(photoX + 430, photoY + 95, 0.85);
+            drawCanvasLantern(photoX + 505, photoY + 145, 0.65);
+            drawCanvasLantern(photoX + 355, photoY + 165, 0.55);
+
+            // Riverside Temple Pagoda & Trees Silhouette along Horizon
+            const horizonY = photoY + 292;
+            ctx.fillStyle = '#090D20';
+            ctx.fillRect(photoX, horizonY - 12, photoW, 16);
+            // Pagoda Spire
+            ctx.beginPath();
+            ctx.moveTo(photoX + 105, horizonY - 10);
+            ctx.lineTo(photoX + 125, horizonY - 58);
+            ctx.lineTo(photoX + 130, horizonY - 88);
+            ctx.lineTo(photoX + 135, horizonY - 58);
+            ctx.lineTo(photoX + 155, horizonY - 10);
+            ctx.closePath();
+            ctx.fill();
+
+            // Moon Water Reflections
+            ctx.strokeStyle = 'rgba(255, 209, 102, 0.28)';
+            ctx.lineWidth = 2.5;
+            for (let r = 0; r < 9; r++) {
+                const ry = photoY + 318 + r * 22;
+                const rw = 84 - r * 4;
+                ctx.beginPath();
+                ctx.moveTo(moonX - rw, ry);
+                ctx.lineTo(moonX + rw, ry);
+                ctx.stroke();
+            }
+
+            // Top Banner inside Photo
+            ctx.fillStyle = '#FDE68A';
+            ctx.font = 'bold 30px Mali, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('สุขสันต์วันลอยกระทง', photoX + 32, photoY + 54);
+
+            ctx.fillStyle = '#CBD5E1';
+            ctx.font = '18px Prompt, sans-serif';
+            ctx.fillText('วันขึ้น ๑๕ ค่ำ เดือน ๑๒ • ๒๔ พฤศจิกายน ๒๕๖๙', photoX + 32, photoY + 86);
+
+            // Golden Glowing Thread Connecting Arm & Katoon's Krathongs
+            const leftX = photoX + 255;
+            const rightX = photoX + 555;
+            const krathongY = photoY + 375;
+
+            ctx.strokeStyle = '#FF8FA3';
+            ctx.lineWidth = 3.5;
+            ctx.setLineDash([8, 8]);
+            ctx.beginPath();
+            ctx.moveTo(leftX + 55, krathongY + 42);
+            ctx.quadraticCurveTo((leftX + rightX) / 2, krathongY + 88, rightX - 55, krathongY + 42);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Heart between both Krathongs
+            ctx.fillStyle = '#FF8FA3';
+            ctx.beginPath();
+            const midX = (leftX + rightX) / 2;
+            const midY = krathongY + 64;
+            ctx.moveTo(midX, midY + 10);
+            ctx.bezierCurveTo(midX - 14, midY - 2, midX - 14, midY - 16, midX, midY - 9);
+            ctx.bezierCurveTo(midX + 14, midY - 16, midX + 14, midY - 2, midX, midY + 10);
+            ctx.fill();
+
+            // Draw Both Customized Krathongs Directly onto Canvas
+            drawKrathongOnCanvas(ctx, leftX, krathongY, 1.38, arm.base, arm.decor);
+            drawKrathongOnCanvas(ctx, rightX, krathongY, 1.38, katoon.base, katoon.decor);
+
+            // Name Pills below each Krathong
+            const drawNameTag = (nx, ny, text, textColor) => {
+                ctx.fillStyle = 'rgba(11, 16, 38, 0.84)';
+                ctx.beginPath();
+                ctx.roundRect(nx - 68, ny, 136, 34, 17);
+                ctx.fill();
+
+                ctx.fillStyle = textColor;
+                ctx.font = 'bold 20px Mali, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(text, nx, ny + 24);
+            };
+            drawNameTag(leftX, krathongY + 96, 'อาร์ม', '#FFD166');
+            drawNameTag(rightX, krathongY + 96, 'การ์ตูน', '#FF8FA3');
+
+            ctx.restore(); // End Photo Clip
+
+            // 3. Polaroid Caption Area
+            let cursorY = captionStartY;
+
+            // Main Title: "สุขสันต์วันลอยกระทง" + "อาร์ม ❤️ การ์ตูน"
+            ctx.fillStyle = '#1E293B';
+            ctx.font = 'bold 36px Mali, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('สุขสันต์วันลอยกระทง', cardWidth / 2, cursorY);
+            cursorY += 44;
+
+            ctx.fillStyle = '#E11D48';
+            ctx.font = 'bold 28px Mali, sans-serif';
+            ctx.fillText('อาร์ม  ❤️  การ์ตูน', cardWidth / 2, cursorY);
+            cursorY += 44;
+
+            // Divider line
+            ctx.strokeStyle = '#E2E8F0';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(120, cursorY - 20);
+            ctx.lineTo(cardWidth - 120, cursorY - 20);
+            ctx.stroke();
+
+            // Arm's Full Wish Block
+            ctx.textAlign = 'left';
+            const leftMargin = 70;
+
+            ctx.fillStyle = '#D97706';
+            ctx.font = 'bold 22px Prompt, sans-serif';
+            ctx.fillText('🌙 คำอธิษฐานของ อาร์ม:', leftMargin, cursorY);
+            cursorY += 34;
+
+            ctx.fillStyle = '#334155';
+            ctx.font = '500 24px Mali, sans-serif';
+            armWishLines.forEach(line => {
+                ctx.fillText(line, leftMargin, cursorY);
+                cursorY += lineHeight;
+            });
+
+            cursorY += 16;
+
+            // Katoon's Full Wish Block
+            ctx.fillStyle = '#E11D48';
+            ctx.font = 'bold 22px Prompt, sans-serif';
+            ctx.fillText('🌸 คำอธิษฐานของ การ์ตูน:', leftMargin, cursorY);
+            cursorY += 34;
+
+            ctx.fillStyle = '#334155';
+            ctx.font = '500 24px Mali, sans-serif';
+            katoonWishLines.forEach(line => {
+                ctx.fillText(line, leftMargin, cursorY);
+                cursorY += lineHeight;
+            });
+
+            cursorY += 22;
+
+            // Footer Date Stamp (ARM & KATOON)
+            ctx.fillStyle = '#94A3B8';
+            ctx.font = '500 17px Prompt, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('LOY KRATHONG TOGETHER • ARM & KATOON • 24 NOV 2026', cardWidth / 2, cursorY);
+
+            return canvas.toDataURL('image/png');
+        }
+
+        function downloadPolaroidPNG() {
+            const dataUrl = latestPolaroidDataUrl || generateHighResPolaroidDataUrl();
+            const link = document.createElement('a');
+            link.download = 'LoyKrathong_Arm_Katoon_2569.png';
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast("บันทึกรูปการ์ดความทรงจำลงเครื่องเรียบร้อยแล้ว!");
+        }
+
+        /* =============================================================
+           10. CONNECTION MODAL & ROOM RESET
+           ============================================================= */
+        function openConfigModal() {
+            const modal = document.getElementById('configModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function applyCustomDbUrl() {
+            const customUrl = document.getElementById('customDbUrlInput').value.trim();
+            if (customUrl) {
+                localStorage.setItem('lk_custom_rtdb_url', customUrl);
+                window.bootFirebaseAutoConnect(customUrl);
+                showToast("กำลังเชื่อมต่อ Database URL ใหม่...");
+            } else {
+                localStorage.removeItem('lk_custom_rtdb_url');
+                window.bootFirebaseAutoConnect();
+                showToast("อัปเดตการเชื่อมต่ออัตโนมัติแล้ว");
+            }
+            closeModal('configModal');
+        }
+
+        function applyLocalResetState() {
+            appState.launched = false;
+            appState.bothPrayedTogether = false;
+            appState.players.arm.ready = false;
+            appState.players.arm.holding = false;
+            appState.players.katoon.ready = false;
+            appState.players.katoon.holding = false;
+            goToStage(1);
+        }
+
+        function resetCoupleRoom() {
+            const resetToken = Date.now();
+            window.lastHandledResetToken = resetToken;
+            applyLocalResetState();
+
+            const resetPayload = {
+                launched: false,
+                resetToken,
+                arm: appState.players.arm,
+                katoon: appState.players.katoon
+            };
+
+            if (appState.syncBackend === 'rtdb' && rtdbInstance && window.FirebaseSDK) {
+                const { set, ref } = window.FirebaseSDK;
+                set(ref(rtdbInstance, `rooms/${PRIVATE_ROOM_ID}`), resetPayload);
+            } else if (appState.syncBackend === 'firestore' && firestoreInstance && window.FirebaseSDK) {
+                const { setDoc, doc } = window.FirebaseSDK;
+                setDoc(doc(firestoreInstance, 'rooms', PRIVATE_ROOM_ID), resetPayload);
+            }
+
+            closeModal('configModal');
+            showToast("เริ่มพิธีลอยกระทงใหม่เรียบร้อยแล้ว!");
+        }
+
+        /* =============================================================
+           11. WEB AUDIO API ROMANTIC THAI CHIMES
+           ============================================================= */
+        let audioCtx = null;
+        let isAudioPlaying = false;
+        let ambientNodes = [];
+        let melodyInterval = null;
+
+        function toggleAudio() {
+            const icon = document.getElementById('audioIcon');
+            if (!isAudioPlaying) {
+                startRomanticAudio();
+                isAudioPlaying = true;
+                icon.className = "fa-solid fa-volume-high text-xs text-amberGlow";
+                showToast("เปิดเสียงขิมบรรเลงค่ำคืนวันเพ็ญแล้ว");
+            } else {
+                stopRomanticAudio();
+                isAudioPlaying = false;
+                icon.className = "fa-solid fa-volume-xmark text-xs";
+                showToast("ปิดเสียงแล้ว");
+            }
+        }
+
+        function startRomanticAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            let b0 = 0, b1 = 0, b2 = 0;
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                b0 = 0.997 * b0 + white * 0.029;
+                b1 = 0.985 * b1 + white * 0.032;
+                b2 = 0.950 * b2 + white * 0.048;
+                output[i] = (b0 + b1 + b2) * 0.15;
+            }
+            const whiteNoise = audioCtx.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+            whiteNoise.loop = true;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 380;
+
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0.11;
+
+            whiteNoise.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            whiteNoise.start(0);
+            ambientNodes.push(whiteNoise, gainNode);
+
+            const pentatonicFreqs = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33];
+            melodyInterval = setInterval(() => {
+                if (!isAudioPlaying) return;
+                const freq = pentatonicFreqs[Math.floor(Math.random() * pentatonicFreqs.length)];
+                playSoftNote(freq, 2.4, 0.045);
+            }, 2200);
+        }
+
+        function playSoftNote(freq, duration = 2.0, volume = 0.06) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+            gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(volume, audioCtx.currentTime + 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playChimeSound() {
+            if (!isAudioPlaying || !audioCtx) return;
+            [523.25, 659.25, 783.99, 1046.50].forEach((f, idx) => {
+                setTimeout(() => playSoftNote(f, 2.8, 0.07), idx * 180);
+            });
+        }
+
+        function stopRomanticAudio() {
+            clearInterval(melodyInterval);
+            ambientNodes.forEach(node => { try { if (node.stop) node.stop(); } catch (e) {} });
+            ambientNodes = [];
+        }
+
+        /* =============================================================
+           12. AMBIENT CANVAS: STARS, FIREFLIES, LANTERNS & HEART FIREWORKS
+           ============================================================= */
+        const canvas = document.getElementById('ambientCanvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [], fireflies = [], lanterns = [], fireworks = [];
+
+        function initAmbientCanvas() {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            for (let i = 0; i < 75; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * (canvas.height * 0.62),
+                    r: Math.random() * 1.6 + 0.4,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.015 + Math.random() * 0.025
+                });
+            }
+
+            for (let i = 0; i < 24; i++) {
+                fireflies.push({
+                    x: Math.random() * canvas.width,
+                    y: canvas.height * 0.45 + Math.random() * (canvas.height * 0.5),
+                    vx: (Math.random() - 0.5) * 0.45,
+                    vy: (Math.random() - 0.5) * 0.35,
+                    r: Math.random() * 2.2 + 1.2,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+
+            document.getElementById('skyInteractiveLayer').addEventListener('click', (e) => {
+                if (e.clientY < window.innerHeight * 0.62) {
+                    if (Math.random() > 0.45) spawnHeartFirework(e.clientX, e.clientY);
+                    else spawnSkyLantern(e.clientX, e.clientY);
+                }
+            });
+
+            requestAnimationFrame(animateAmbient);
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function spawnSkyLantern(x = null, y = null) {
+            lanterns.push({
+                x: x ?? (canvas.width * 0.2 + Math.random() * canvas.width * 0.6),
+                y: y ?? (canvas.height * 0.58),
+                vy: -0.65 - Math.random() * 0.45,
+                swayPhase: Math.random() * Math.PI * 2,
+                scale: 0.75 + Math.random() * 0.45,
+                alpha: 1
+            });
+            if (isAudioPlaying) playSoftNote(587.33, 1.5, 0.04);
+        }
+
+        function spawnHeartFirework(cx = null, cy = null) {
+            const x = cx ?? (canvas.width * 0.25 + Math.random() * canvas.width * 0.5);
+            const y = cy ?? (canvas.height * 0.16 + Math.random() * canvas.height * 0.24);
+            const colors = ['#FF8FA3', '#FFD166', '#F472B6', '#FDE047'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            for (let t = 0; t < Math.PI * 2; t += 0.22) {
+                const hx = 16 * Math.pow(Math.sin(t), 3);
+                const hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+                fireworks.push({ x, y, vx: hx * 0.16, vy: hy * 0.16, alpha: 1, color });
+            }
+            if (isAudioPlaying) playSoftNote(783.99, 1.8, 0.05);
+        }
+
+        function animateAmbient() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            stars.forEach(s => {
+                s.phase += s.speed;
+                const alpha = 0.35 + Math.sin(s.phase) * 0.45;
+                ctx.fillStyle = `rgba(255, 251, 235, ${Math.max(0.1, alpha)})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            fireflies.forEach(f => {
+                f.x += f.vx;
+                f.y += f.vy;
+                f.phase += 0.04;
+                if (f.x < 0) f.x = canvas.width;
+                if (f.x > canvas.width) f.x = 0;
+                if (f.y < canvas.height * 0.4) f.vy = Math.abs(f.vy);
+                if (f.y > canvas.height * 0.95) f.vy = -Math.abs(f.vy);
+
+                const glow = 0.4 + Math.sin(f.phase) * 0.45;
+                ctx.fillStyle = `rgba(255, 209, 102, ${Math.max(0.1, glow)})`;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#FFD166';
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+
+            for (let i = lanterns.length - 1; i >= 0; i--) {
+                const l = lanterns[i];
+                l.y += l.vy;
+                l.swayPhase += 0.025;
+                const drawX = l.x + Math.sin(l.swayPhase) * 14;
+                if (l.y < 60) l.alpha -= 0.012;
+                if (l.alpha <= 0) { lanterns.splice(i, 1); continue; }
+
+                ctx.save();
+                ctx.translate(drawX, l.y);
+                ctx.scale(l.scale, l.scale);
+                ctx.globalAlpha = l.alpha;
+
+                const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, 24);
+                grad.addColorStop(0, '#FFFBEB');
+                grad.addColorStop(0.5, '#F59E0B');
+                grad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = '#FBBF24';
+                ctx.beginPath();
+                ctx.moveTo(-10, -14); ctx.lineTo(10, -14); ctx.lineTo(7, 12); ctx.lineTo(-7, 12);
+                ctx.closePath(); ctx.fill();
+                ctx.restore();
+            }
+
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                const p = fireworks[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.02;
+                p.alpha -= 0.016;
+                if (p.alpha <= 0) { fireworks.splice(i, 1); continue; }
+
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 2.3, 0, Math.PI * 2); ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+
+            requestAnimationFrame(animateAmbient);
+        }
+
+        /* =============================================================
+           13. TOAST HELPER
+           ============================================================= */
+        let toastTimeout = null;
+        function showToast(msg, iconClass = "fa-circle-check") {
+            const banner = document.getElementById('toastBanner');
+            document.getElementById('toastText').textContent = msg;
+            document.getElementById('toastIcon').className = `fa-solid ${iconClass} text-amberGlow`;
+
+            banner.classList.remove('opacity-0', '-translate-y-2');
+            banner.classList.add('opacity-100', 'translate-y-0');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                banner.classList.add('opacity-0', '-translate-y-2');
+                banner.classList.remove('opacity-100', 'translate-y-0');
+            }, 2800);
+        }
+    </script>
+</body>
+</html>
